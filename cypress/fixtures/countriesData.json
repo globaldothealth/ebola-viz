@@ -1,0 +1,40 @@
+{
+    "11-18-2021": [
+        {
+            "ESP": {
+                "confirmed": 58,
+                "suspected": 10
+            }
+        },
+        {
+            "PRT": {
+                "confirmed": 48,
+                "suspected": 25
+            }
+        },
+        {
+            "CAN": {
+                "confirmed": 14,
+                "suspected": 1
+            }
+        },
+        {
+            "NLD": {
+                "confirmed": 11,
+                "suspected": 0
+            }
+        },
+        {
+            "DEU": {
+                "confirmed": 11,
+                "suspected": 0
+            }
+        },
+        {
+            "ARG": {
+                "confirmed": 20,
+                "suspected": 0
+            }
+        }
+    ]
+}
