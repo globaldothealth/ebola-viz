@@ -14,6 +14,7 @@ import {
 } from 'redux/App/slice';
 
 import admin1LookupTable from 'data/mapbox-boundaries-adm1-v3_3.json';
+import countriesLookupTable from 'data/admin0-lookup-table.json';
 import { CountryViewColors } from 'models/Colors';
 import mapboxgl from 'mapbox-gl';
 import Legend from 'components/Legend';
@@ -78,6 +79,30 @@ const RegionalView: React.FC = () => {
         }
 
         return data;
+    }, [countriesData]);
+
+    useEffect(() => {
+        if (!countriesData) return;
+
+        const mapRef = map.current;
+        if (!mapRef) return;
+
+        const typedCountriesLookupTable = countriesLookupTable.adm0.data
+            .all as {
+            [key: string]: any;
+        };
+
+        const uganda =
+            typedCountriesLookupTable[getTwoLetterCountryCode('Uganda')];
+        if (!uganda) return;
+
+        mapRef.fitBounds(uganda.bounds);
+
+        // on some browsers the blank space is added below the body element when using fitBounds function
+        // this is to manually scroll to top of the page where map is located
+        setTimeout(() => {
+            scrollTo(0, 0);
+        }, 100);
     }, [countriesData]);
 
     useEffect(() => {
