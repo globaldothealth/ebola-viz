@@ -13,7 +13,7 @@ import {
     DataType,
 } from 'redux/App/slice';
 
-import countriesLookupTable from 'data/admin0-lookup-table.json';
+import admin1LookupTable from 'data/mapbox-boundaries-adm1-v3_3.json';
 import { CountryViewColors } from 'models/Colors';
 import mapboxgl from 'mapbox-gl';
 import Legend from 'components/Legend';
@@ -39,7 +39,7 @@ const dataLayers: LegendRow[] = [
     { label: '>100', color: CountryViewColors['>100'] },
 ];
 
-const CountryView: React.FC = () => {
+const RegionalView: React.FC = () => {
     const dispatch = useAppDispatch();
 
     const mapboxAccessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN || '';
@@ -59,20 +59,21 @@ const CountryView: React.FC = () => {
 
     const smallScreen = useMediaQuery('(max-width:1400px)');
 
-    const countryLookupData = useMemo(() => {
+    const admin1LookupData = useMemo(() => {
         const data: { [key: string]: any } = [];
-        const typedCountriesLookupTable = countriesLookupTable as {
-            [key: string]: any;
-        };
 
         for (const country of countriesData) {
-            const countryRow =
-                typedCountriesLookupTable.adm0.data.all[
-                    getTwoLetterCountryCode(country.name)
-                ];
+            for (const district of country.districts) {
+                const districtRow = admin1LookupTable.find(
+                    (data) =>
+                        data.iso_3166_1 ===
+                            getTwoLetterCountryCode(country.name) &&
+                        data.name === district.name,
+                );
 
-            if (countryRow) {
-                data[country.name] = countryRow;
+                if (districtRow) {
+                    data[district.name] = districtRow;
+                }
             }
         }
 
@@ -91,12 +92,12 @@ const CountryView: React.FC = () => {
         if (currentPopup) currentPopup.remove();
     }, [dragging]);
 
-    // Fly to country
+    // Fly to district
     useEffect(() => {
         if (
             !selectedCountry ||
-            !countryLookupData ||
-            Object.keys(countryLookupData).length === 0
+            !admin1LookupData ||
+            Object.keys(admin1LookupData).length === 0
         )
             return;
 
@@ -109,7 +110,10 @@ const CountryView: React.FC = () => {
             return;
         }
 
-        const bounds = countryLookupData[name].bounds;
+        const bounds = admin1LookupData[name].bounds
+            .replace('[', '')
+            .replace(']', '')
+            .split(',');
         map.current?.fitBounds(bounds);
 
         // on some browsers the blank space is added below the body element when using fitBounds function
@@ -117,7 +121,7 @@ const CountryView: React.FC = () => {
         setTimeout(() => {
             scrollTo(0, 0);
         }, 100);
-    }, [selectedCountry, countryLookupData]);
+    }, [selectedCountry, admin1LookupData]);
 
     // Setup map
     useEffect(() => {
@@ -133,38 +137,40 @@ const CountryView: React.FC = () => {
         const mapRef = map.current;
         if (!mapRef || isLoading) return;
 
-        if (mapRef.getLayer('countryJoin')) {
-            mapRef.removeLayer('countryJoin');
+        if (mapRef.getLayer('admin1Join')) {
+            mapRef.removeLayer('admin1Join');
         }
 
-        if (mapRef.getSource('countryData')) {
-            mapRef.removeSource('countryData');
+        if (mapRef.getSource('admin1Data')) {
+            mapRef.removeSource('admin1Data');
         }
 
-        mapRef.addSource('countryData', {
+        mapRef.addSource('admin1Data', {
             type: 'vector',
-            url: 'mapbox://mapbox.country-boundaries-v1',
+            url: 'mapbox://mapbox.boundaries-adm1-v3',
         });
 
         const setData = () => {
             for (const country of countriesData) {
-                mapRef.setFeatureState(
-                    {
-                        source: 'countryData',
-                        sourceLayer: 'country_boundaries',
-                        id: countryLookupData[country.name].feature_id,
-                    },
-                    {
-                        name: country.name,
-                        numberOfCases: country.totalCases,
-                    },
-                );
+                for (const district of country.districts) {
+                    mapRef.setFeatureState(
+                        {
+                            source: 'admin1Data',
+                            sourceLayer: 'boundaries_admin_1',
+                            id: admin1LookupData[district.name].feature_id,
+                        },
+                        {
+                            name: district.name,
+                            numberOfCases: district.totalCases,
+                        },
+                    );
+                }
             }
         };
 
         // Check if `adm1Data` source is loaded.
         const setAfterLoad = (event: any) => {
-            if (event.sourceID !== 'countryData' && !event.isSourceLoaded)
+            if (event.sourceID !== 'admin1Data' && !event.isSourceLoaded)
                 return;
             setData();
             setMapLoaded(true);
@@ -172,7 +178,7 @@ const CountryView: React.FC = () => {
         };
 
         // If `adm1Data` source is loaded, call `setStates()`.
-        if (mapRef.isSourceLoaded('countryData')) {
+        if (mapRef.isSourceLoaded('admin1Data')) {
             setData();
             setMapLoaded(true);
         } else {
@@ -181,10 +187,10 @@ const CountryView: React.FC = () => {
 
         mapRef.addLayer(
             {
-                id: 'countryJoin',
+                id: 'admin1Join',
                 type: 'fill',
-                source: 'countryData',
-                'source-layer': 'country_boundaries',
+                source: 'admin1Data',
+                'source-layer': 'boundaries_admin_1',
                 paint: {
                     'fill-color': [
                         'case',
@@ -209,20 +215,20 @@ const CountryView: React.FC = () => {
                     ],
                 },
             },
-            'admin-1-boundary',
+            'waterway-label',
         );
 
         // Change the mouse cursor to pointer when hovering above this layer
-        mapRef.on('mouseenter', 'countryJoin', () => {
+        mapRef.on('mouseenter', 'admin1Join', () => {
             mapRef.getCanvas().style.cursor = 'pointer';
         });
 
-        mapRef.on('mouseleave', 'countryJoin', () => {
+        mapRef.on('mouseleave', 'admin1Join', () => {
             mapRef.getCanvas().style.cursor = '';
         });
 
         // Add click listener and show popups
-        mapRef.on('click', 'countryJoin', (e) => {
+        mapRef.on('click', 'admin1Join', (e) => {
             if (!e.features || !e.features[0].state.name) return;
 
             const countryName = e.features[0].state.name;
@@ -239,7 +245,7 @@ const CountryView: React.FC = () => {
         });
 
         //Filter out countries without any data
-        mapRef.setFilter('countryJoin', [
+        mapRef.setFilter('admin1Join', [
             'in',
             'iso_3166_1',
             ...countriesData.map((country) =>
@@ -264,19 +270,24 @@ const CountryView: React.FC = () => {
         // Close previous popup if it exists
         if (currentPopup) currentPopup.remove();
 
-        const country = countriesData.find(
-            (country) => country.name === countryName,
-        );
+        let selectedDistrict: { name: string; totalCases: number } | undefined =
+            undefined;
+        for (const country of countriesData) {
+            for (const district of country.districts) {
+                if (district.name === countryName) selectedDistrict = district;
+            }
+        }
 
-        if (!country) return;
+        if (!selectedDistrict) return;
 
-        const countryDetails = countryLookupData[countryName];
-        if (!countryDetails) return;
+        const districtDetails = admin1LookupData[countryName];
+        if (!districtDetails) return;
 
-        const totalCases = country.totalCases;
-        const lat = countryDetails.centroid[1];
-        const lng = countryDetails.centroid[0];
-        const coordinates: mapboxgl.LngLatLike = { lng, lat };
+        const totalCases = selectedDistrict.totalCases;
+        const coordinates = districtDetails.centroid
+            .replace('[', '')
+            .replace(']', '')
+            .split(',');
 
         const popupContent = (
             <>
@@ -331,4 +342,4 @@ const CountryView: React.FC = () => {
     );
 };
 
-export default CountryView;
+export default RegionalView;

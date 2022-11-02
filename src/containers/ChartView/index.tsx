@@ -140,11 +140,7 @@ const ChartView = () => {
                     sx={{ width: '100%', textAlign: 'center' }}
                 >
                     {chartTypes[chartType].title}
-                    <strong>
-                        {selectedCountry
-                            ? getCountryName(selectedCountry.name)
-                            : `Worldwide`}
-                    </strong>
+                    <strong>{selectedCountry}</strong>
                 </Typography>
                 <ToggleButtonGroup
                     color="primary"
@@ -215,10 +211,6 @@ const ChartView = () => {
                 </ResponsiveContainer>
                 <ChartSlider />
             </ChartContainer>
-            <CopyStateLinkButton
-                onWhichContainer="chart"
-                chartType={chartType}
-            />
         </>
     );
 };

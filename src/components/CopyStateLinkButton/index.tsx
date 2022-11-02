@@ -2,45 +2,23 @@ import { RefObject, useEffect, useState } from 'react';
 import DoneIcon from '@mui/icons-material/Done';
 import LinkIcon from '@mui/icons-material/Link';
 import { useAppDispatch, useAppSelector } from 'redux/hooks';
-import { selectChartDatePeriod } from 'redux/ChartView/selectors';
-import {
-    selectCurrentDate,
-    selectDataType,
-    selectSelectedCountryInSideBar,
-    selectTimeseriesDates,
-} from 'redux/App/selectors';
+import { selectSelectedCountryInSideBar } from 'redux/App/selectors';
 import { URLToFilters } from 'utils/helperFunctions';
-import {
-    setPopup,
-    setSelectedCountryInSidebar,
-    setDataType,
-    DataType,
-} from 'redux/App/slice';
-import { selectCountriesData } from '../../redux/App/selectors';
+import { setPopup, setSelectedCountryInSidebar } from 'redux/App/slice';
+import { selectCountriesData } from 'redux/CountryView/selectors';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import { CopyStateLinkButtonContainer } from './styled';
-import { ChartTypeNames } from 'containers/ChartView/index';
 
 interface CopyStateLinkButtonProps {
-    onWhichContainer: 'view' | 'chart';
     map?: RefObject<mapboxgl.Map | null>;
-    chartType?: ChartTypeNames;
 }
 
-const CopyStateLinkButton = ({
-    onWhichContainer,
-    map,
-    chartType,
-}: CopyStateLinkButtonProps) => {
+const CopyStateLinkButton = ({ map }: CopyStateLinkButtonProps) => {
     const dispatch = useAppDispatch();
 
-    const chartDatePeriod = useAppSelector(selectChartDatePeriod);
     const selectedCountry = useAppSelector(selectSelectedCountryInSideBar);
     const countriesData = useAppSelector(selectCountriesData);
-    const timeseriesDates = useAppSelector(selectTimeseriesDates);
-    const currentDate = useAppSelector(selectCurrentDate);
-    const dataType = useAppSelector(selectDataType);
 
     useEffect(() => {
         const newViewValues = URLToFilters(location.search);
@@ -52,8 +30,6 @@ const CopyStateLinkButton = ({
             mapRef.setCenter([newViewValues.lng || 40, newViewValues.lat || 0]);
             mapRef.setZoom(newViewValues.zoom || 2.5);
         }
-
-        dispatch(setDataType(handleDataTypeNumber(newViewValues.dataType)));
 
         if (
             countriesData.find((country) => country.name === newViewValues.name)
@@ -71,7 +47,7 @@ const CopyStateLinkButton = ({
     }, [location.search, countriesData]);
 
     const [copyHandler, setCopyHandler] = useState({
-        message: `Copy link to ${onWhichContainer}`,
+        message: `Copy link to view`,
         isCopying: false,
     });
 
@@ -84,15 +60,10 @@ const CopyStateLinkButton = ({
         }, 3000);
     }, [snackbarAlertOpen]);
 
-    const handleDataTypeNumber = (dataType: DataType | undefined) => {
-        const handledNumber = Number(dataType);
-        if (!handledNumber || handledNumber > 1 || handledNumber < 0)
-            return DataType.Confirmed;
-        return DataType.Combined;
-    };
-
     const handleCopyLinkButton = () => {
         const mapRef = map?.current;
+
+        if (!mapRef) return;
 
         if (copyHandler.isCopying) return;
 
@@ -100,36 +71,19 @@ const CopyStateLinkButton = ({
             ? selectedCountry.name
             : 'worldwide';
 
-        if (onWhichContainer === 'chart') {
-            navigator.clipboard.writeText(
-                `${window.location.href}?name=${countryName}&startDate=${
-                    chartDatePeriod[0]
-                }&endDate=${chartDatePeriod[1]}&chartType=${
-                    chartType || ChartTypeNames.Cumulative
-                }`,
-            );
-        } else if (!mapRef) return;
-        else {
-            const center = mapRef.getCenter().toArray();
-            const zoom = mapRef.getZoom();
-            const currDate =
-                dataType || !currentDate
-                    ? timeseriesDates.length - 1
-                    : timeseriesDates.indexOf(currentDate);
+        const center = mapRef.getCenter().toArray();
+        const zoom = mapRef.getZoom();
 
-            navigator.clipboard.writeText(
-                `${
-                    window.location.href
-                }?name=${countryName}&currDate=${currDate}${
-                    '&lng=' + center[0] + '&lat=' + center[1] + '&zoom=' + zoom
-                }&dataType=${dataType}`,
-            );
-        }
+        navigator.clipboard.writeText(
+            `${window.location.href}?name=${countryName}${
+                '&lng=' + center[0] + '&lat=' + center[1] + '&zoom=' + zoom
+            }`,
+        );
         setCopyHandler({ message: 'Copied!', isCopying: true });
 
         setTimeout(() => {
             setCopyHandler({
-                message: `Copy link to ${onWhichContainer}`,
+                message: `Copy link to view`,
                 isCopying: false,
             });
         }, 2000);

@@ -3,12 +3,16 @@ import {
     TimeseriesCountryDataRow,
     ParsedCountryDataRow,
     TimeseriesCaseCountsDataRow,
+    EbolaCaseData,
+    CaseStatus,
+    CountriesData,
     SelectedCountry,
 } from 'models/CountryData';
 import { DataType } from 'redux/App/slice';
 import { ChartDataFormat } from 'models/ChartData';
 import { isEqual, format, compareAsc, isBefore } from 'date-fns';
 import { ViewParamURLValues } from 'models/ViewParamURLValues';
+import Papa from 'papaparse';
 
 // Parses search query that takes user to Curator Portal
 export const parseSearchQuery = (searchQuery: string): string => {
@@ -32,9 +36,9 @@ export const getCountryName = (code: string) => {
     return countryObj ? countryObj.country : 'N/A';
 };
 
-// Returns two letter country code based on three letter code
-export const getTwoLetterCountryCode = (code: string) => {
-    const countryObj = iso.whereAlpha3(code);
+// Returns two letter country code based on the country name
+export const getTwoLetterCountryCode = (name: string) => {
+    const countryObj = iso.whereCountry(name);
     return countryObj ? countryObj.alpha2 : 'N/A';
 };
 
@@ -276,11 +280,11 @@ export const sortCountriesData = (
 
 export const getAvailableDatesForCountry = (
     timeseriesCountryData: TimeseriesCountryDataRow[],
-    country: SelectedCountry,
+    country: string,
 ): Date[] => {
     // Get data only for selected country
     const filteredData = timeseriesCountryData.filter(
-        (data) => data.country === country.name,
+        (data) => data.country === country,
     );
 
     // Get all available dates for this country
@@ -312,4 +316,13 @@ export const URLToFilters = (url: string): ViewParamURLValues => {
     });
 
     return filters;
+};
+
+export const getTotalCasesNumber = (countriesData: CountriesData[]): number => {
+    const totalCases = countriesData.reduce(
+        (prev, current) => prev + current.totalCases,
+        0,
+    );
+
+    return totalCases;
 };

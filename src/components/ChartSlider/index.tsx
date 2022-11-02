@@ -49,7 +49,7 @@ export default function ChartSlider() {
             selectedCountry && selectedCountry.name !== 'worldwide'
                 ? getAvailableDatesForCountry(
                       timeseriesCountryData,
-                      selectedCountry,
+                      selectedCountry.name,
                   )
                 : allTimeseriesDates;
 

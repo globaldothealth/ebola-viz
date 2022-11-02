@@ -7,11 +7,11 @@ import {
     fetchTimeseriesCountData,
 } from './thunks';
 import {
-    SelectedCountry,
     ParsedCountryDataRow,
     TotalCasesValues,
     TimeseriesCountryDataRow,
     TimeseriesCaseCountsDataRow,
+    SelectedCountry,
 } from 'models/CountryData';
 
 interface IPopup {
