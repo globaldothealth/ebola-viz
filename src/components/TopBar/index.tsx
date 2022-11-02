@@ -48,7 +48,7 @@ const TopBar = () => {
                             </Typography>
                         </NavLink>
 
-                        <a href="mailto:info@global.health?subject=Feedback regarding Global.health map">
+                        <a href="mailto:info@global.health?subject=Feedback regarding Global.health Ebola map">
                             <Typography variant="navbarlink" gutterBottom>
                                 Feedback
                             </Typography>

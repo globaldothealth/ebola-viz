@@ -6,7 +6,8 @@ import RegionalView from 'containers/RegionalView';
 import SideBar from 'components/SideBar';
 import { useAppDispatch, useAppSelector } from 'redux/hooks';
 import { fetchCountriesData } from 'redux/CountryView/thunk';
-import { selectIsLoading, selectError } from 'redux/App/selectors';
+import { selectIsLoading } from 'redux/App/selectors';
+import { selectEbolaLoadingError } from 'redux/CountryView/selectors';
 import Loader from 'components/Loader';
 import ErrorAlert from 'components/ErrorAlert';
 import ReactGA from 'react-ga4';
@@ -38,7 +39,7 @@ const App = () => {
     const dispatch = useAppDispatch();
 
     const isLoading = useAppSelector(selectIsLoading);
-    const error = useAppSelector(selectError);
+    const error = useAppSelector(selectEbolaLoadingError);
 
     // Fetch data from AWS S3
     useEffect(() => {

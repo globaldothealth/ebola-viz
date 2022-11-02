@@ -5,13 +5,8 @@ import { useAppSelector, useAppDispatch } from 'redux/hooks';
 import {
     selectSelectedCountryInSideBar,
     selectPopupData,
-    selectDataType,
 } from 'redux/App/selectors';
-import {
-    setSelectedCountryInSidebar,
-    setPopup,
-    DataType,
-} from 'redux/App/slice';
+import { setSelectedCountryInSidebar, setPopup } from 'redux/App/slice';
 
 import admin1LookupTable from 'data/mapbox-boundaries-adm1-v3_3.json';
 import countriesLookupTable from 'data/admin0-lookup-table.json';
@@ -49,7 +44,6 @@ const RegionalView: React.FC = () => {
     const countriesData = useAppSelector(selectCountriesData);
     const selectedCountry = useAppSelector(selectSelectedCountryInSideBar);
     const popupData = useAppSelector(selectPopupData);
-    const dataType = useAppSelector(selectDataType);
 
     const [mapLoaded, setMapLoaded] = useState(false);
     const [currentPopup, setCurrentPopup] = useState<mapboxgl.Popup>();
@@ -355,14 +349,7 @@ const RegionalView: React.FC = () => {
                 ref={mapContainer}
                 isLoading={isLoading || !mapLoaded}
             />
-            <Legend
-                title={
-                    dataType === DataType.Confirmed
-                        ? 'Confirmed Cases'
-                        : 'Confirmed and Suspected Cases'
-                }
-                legendRows={dataLayers}
-            />
+            <Legend title="Confirmed cases" legendRows={dataLayers} />
         </>
     );
 };

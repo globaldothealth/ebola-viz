@@ -30,7 +30,6 @@ import { setSelectedCountryInSidebar, setPopup } from 'redux/App/slice';
 import { selectSelectedCountryInSideBar } from 'redux/App/selectors';
 import {
     getTwoLetterCountryCode,
-    getCountryName,
     getTotalCasesNumber,
 } from 'utils/helperFunctions';
 import { SelectedCountry } from 'models/CountryData';
@@ -356,7 +355,7 @@ const SideBar = () => {
                                         }
                                         variant="body2"
                                     >
-                                        {getCountryName('worldwide')}
+                                        Worldwide
                                     </CountryLabel>
                                 </>
                                 <CountryCaseCount

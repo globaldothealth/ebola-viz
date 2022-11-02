@@ -23,6 +23,7 @@ export const fetchCountriesData = createAsyncThunk<
 
         // convert csv to json
         const latestFile = await fetch(dataUrl);
+        if (latestFile.status !== 200) throw new Error();
         const reader = latestFile.body?.getReader();
         const result = await reader?.read();
         const decoder = new TextDecoder('utf-8');
