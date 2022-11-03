@@ -7,7 +7,6 @@ import {
     StyledMapGuideButton,
     StyledTooltipTitle,
     MapGuideButton,
-    Link,
 } from './styled';
 import { useState } from 'react';
 
@@ -34,31 +33,27 @@ const StyledMapGuideContext: React.FC = () => {
     return (
         <>
             <StyledTooltipTitle>
-                Welcome to the Global.health monkeypox map!
+                Welcome to the Global.health Ebola map!
             </StyledTooltipTitle>
             <Typography
                 sx={{
                     marginBottom: '2rem',
                 }}
             >
-                These geospatial data visualisations allow you to explore data
-                produced by the World Health Organization for the 2022 Monkeypox
-                outbreak. You can read about our data transition and completing
-                a 100 days mission on the{' '}
-                <Link
-                    href="https://globaldothealth.substack.com/p/tracking-the-2022-monkeypox-outbreak-8c3"
-                    target="_blank"
-                    rel="noreferrer"
-                >
-                    G.h blog
-                </Link>
-                .
+                These geospatial data visualizations allow you to explore data
+                for the 2022 Ebola outbreak in Uganda. Further expansion is
+                possible and our team will continue to track cases through the
+                first 100 days.
             </Typography>
             <Typography>
-                <strong>Country View:</strong> Click on a country to see
-                available data in that country. You can also use the left-hand
-                navigation to search or select a country. Darker colours
-                indicate more available data.
+                <strong>Country View:</strong> Explore data at the country
+                level.
+            </Typography>
+
+            <br />
+            <Typography>
+                <strong>Regional View:</strong> Explore data at the sub-national
+                level.
             </Typography>
         </>
     );
