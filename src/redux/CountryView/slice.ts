@@ -7,6 +7,7 @@ interface CountryViewState {
     countriesData: CountriesData[];
     countries: string[];
     error: string | undefined;
+    lastModifiedDate: string | null;
 }
 
 const initialState: CountryViewState = {
@@ -14,6 +15,7 @@ const initialState: CountryViewState = {
     countriesData: [],
     countries: [],
     error: undefined,
+    lastModifiedDate: null,
 };
 
 const countryViewSlice = createSlice({
@@ -38,11 +40,13 @@ const countryViewSlice = createSlice({
                 }: PayloadAction<{
                     countriesData: CountriesData[];
                     countries: string[];
+                    lastModifiedDate: string | null;
                 }>,
             ) => {
                 state.isLoading = false;
                 state.countriesData = payload.countriesData;
                 state.countries = payload.countries;
+                state.lastModifiedDate = payload.lastModifiedDate;
             },
         );
         builder.addCase(fetchCountriesData.rejected, (state, action) => {

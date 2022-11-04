@@ -8,3 +8,5 @@ export const selectCountries = (state: RootState) =>
     state.countryView.countries;
 export const selectEbolaLoadingError = (state: RootState) =>
     state.countryView.error;
+export const selectLastModifiedDate = (state: RootState) =>
+    state.countryView.lastModifiedDate;

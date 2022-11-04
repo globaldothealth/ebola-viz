@@ -7,6 +7,7 @@ import { selectAppVersion } from 'redux/App/selectors';
 import {
     selectCountriesData,
     selectEbolaLoading,
+    selectLastModifiedDate,
 } from 'redux/CountryView/selectors';
 import { setCountriesData } from 'redux/CountryView/slice';
 import { useAppDispatch, useAppSelector } from 'redux/hooks';
@@ -43,6 +44,7 @@ const SideBar = () => {
     const isLoading = useAppSelector(selectEbolaLoading);
     const selectedCountry = useAppSelector(selectSelectedCountryInSideBar);
     const appVersion = useAppSelector(selectAppVersion);
+    const lastModifiedDate = useAppSelector(selectLastModifiedDate);
 
     const countriesData = useAppSelector(selectCountriesData);
     const [autocompleteData, setAutocompleteData] = useState<SelectedCountry[]>(
@@ -260,6 +262,20 @@ const SideBar = () => {
                             </span>
                         </>
                     )}
+
+                    <div className="last-updated-date">
+                        {isLoading ? (
+                            <SideBarTitlesSkeleton
+                                animation="pulse"
+                                variant="rectangular"
+                                data-cy="loading-skeleton"
+                            />
+                        ) : (
+                            <span id="last-updated-date">
+                                Updated: {lastModifiedDate}
+                            </span>
+                        )}
+                    </div>
                 </LatestGlobal>
 
                 <SearchBar className="searchbar">

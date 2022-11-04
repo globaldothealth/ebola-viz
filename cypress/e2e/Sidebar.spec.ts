@@ -32,7 +32,7 @@ describe('<SideBar />', () => {
 
         cy.visit('/');
 
-        cy.get('[data-cy="loading-skeleton"]').should('have.length', 2);
+        cy.get('[data-cy="loading-skeleton"]').should('have.length', 3);
 
         cy.wait('@fetchCountriesData', { timeout: 15000 });
 

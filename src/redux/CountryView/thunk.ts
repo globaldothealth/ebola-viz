@@ -5,11 +5,14 @@ import {
     CountriesData,
 } from 'models/CountryData';
 import Papa from 'papaparse';
+import enUSLocale from 'date-fns/locale/en-US';
+import { formatInTimeZone } from 'date-fns-tz';
 
 export const fetchCountriesData = createAsyncThunk<
     {
         countriesData: CountriesData[];
         countries: string[];
+        lastModifiedDate: string | null;
     },
     void,
     { rejectValue: string }
@@ -23,6 +26,7 @@ export const fetchCountriesData = createAsyncThunk<
 
         // convert csv to json
         const latestFile = await fetch(dataUrl);
+        const lastModifiedDate = latestFile.headers.get('Last-Modified');
         if (latestFile.status !== 200) throw new Error();
         const reader = latestFile.body?.getReader();
         const result = await reader?.read();
@@ -99,9 +103,27 @@ export const fetchCountriesData = createAsyncThunk<
             });
         }
 
-        return { countriesData, countries };
+        // parse last modified date
+        let parsedModifiedDate: string | null = null;
+        if (lastModifiedDate) {
+            parsedModifiedDate = formatInTimeZone(
+                new Date(lastModifiedDate),
+                'Europe/Berlin',
+                'E LLL d yyyy',
+                {
+                    locale: enUSLocale,
+                },
+            );
+        }
+
+        return {
+            countriesData,
+            countries,
+            lastModifiedDate: parsedModifiedDate,
+        };
     } catch (error: any) {
-        if (error.response) return rejectWithValue(error.response.message);
+        if (error.response)
+            return rejectWithValue(error.response.message as string);
 
         throw error;
     }
