@@ -31,12 +31,3 @@ export const StyledTooltipTitle = styled('h2')(() => ({
     padding: '1.6rem 2.4rem',
     fontWeight: 450,
 }));
-
-export const Link = styled('a')(() => ({
-    color: '#fff',
-    fontWeight: 'bold',
-
-    '&:hover': {
-        color: '#fff',
-    },
-}));

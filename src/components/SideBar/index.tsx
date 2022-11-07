@@ -3,16 +3,13 @@ import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import { useLocation } from 'react-router-dom';
 import { useState, SyntheticEvent, useEffect } from 'react';
+import { selectAppVersion } from 'redux/App/selectors';
 import {
     selectCountriesData,
-    selectLastUpdateDate,
-    selectTotalCasesNumber,
-    selectAppVersion,
-    selectDataType,
-    selectCurrentDate,
-    selectTimeseriesCaseCounts,
-    selectIsCaseCountsLoading,
-} from 'redux/App/selectors';
+    selectEbolaLoading,
+    selectLastModifiedDate,
+} from 'redux/CountryView/selectors';
+import { setCountriesData } from 'redux/CountryView/slice';
 import { useAppDispatch, useAppSelector } from 'redux/hooks';
 import {
     FlagIcon,
@@ -30,76 +27,74 @@ import {
     VersionNumber,
     EmptyFlag,
 } from './styled';
-import {
-    setSelectedCountryInSidebar,
-    setPopup,
-    DataType,
-    setCountriesData,
-} from 'redux/App/slice';
+import { setSelectedCountryInSidebar, setPopup } from 'redux/App/slice';
 import { selectSelectedCountryInSideBar } from 'redux/App/selectors';
-import { SelectedCountry } from 'models/CountryData';
 import {
     getTwoLetterCountryCode,
-    getTotalCasesByDate,
-    getCountryName,
+    getTotalCasesNumber,
 } from 'utils/helperFunctions';
-import { DataTypeButtons } from './DataTypeButtons';
+import { SelectedCountry } from 'models/CountryData';
 
 const SideBar = () => {
     const dispatch = useAppDispatch();
     const location = useLocation();
 
     const [openSidebar, setOpenSidebar] = useState(true);
-    const [timeseriesTotalCases, setTimeseriesTotalCases] = useState<number>();
 
-    const totalCasesNumber = useAppSelector(selectTotalCasesNumber);
-    const totalCasesCountIsLoading = useAppSelector(selectIsCaseCountsLoading);
-    const lastUpdateDate = useAppSelector(selectLastUpdateDate);
+    const isLoading = useAppSelector(selectEbolaLoading);
     const selectedCountry = useAppSelector(selectSelectedCountryInSideBar);
     const appVersion = useAppSelector(selectAppVersion);
-    const dataType = useAppSelector(selectDataType);
-    const currentDate = useAppSelector(selectCurrentDate);
-    const timeseriesCaseCounts = useAppSelector(selectTimeseriesCaseCounts);
+    const lastModifiedDate = useAppSelector(selectLastModifiedDate);
 
     const countriesData = useAppSelector(selectCountriesData);
     const [autocompleteData, setAutocompleteData] = useState<SelectedCountry[]>(
         [],
     );
+    const [totalCasesNumber, setTotalCasesNumber] = useState(0);
+
+    const regionalView = location.pathname === '/regional';
+
+    useEffect(() => {
+        if (isLoading || !countriesData || countriesData.length === 0) return;
+
+        setTotalCasesNumber(getTotalCasesNumber(countriesData));
+    }, [countriesData]);
 
     // Map countries data to autocomplete data
     useEffect(() => {
-        let mappedData = countriesData.map((country) => {
-            return { name: country.name };
-        });
+        let mappedData: { name: string; parentCountry?: string }[] = [];
+
+        if (regionalView) {
+            for (const country of countriesData) {
+                const districts = country.districts.map((district) => {
+                    return { name: district.name, parentCountry: country.name };
+                });
+
+                mappedData = [...mappedData, ...districts];
+            }
+        } else {
+            mappedData = countriesData.map((country) => {
+                return { name: country.name };
+            });
+        }
 
         // Add worldwide option
         mappedData = [{ name: 'worldwide' }, ...mappedData];
 
         setAutocompleteData(mappedData);
-    }, [countriesData]);
+    }, [countriesData, location.pathname]);
 
     // Sort countries based on number of cases
     useEffect(() => {
         if (!countriesData || countriesData.length === 0) return;
 
-        const sortBy =
-            dataType === DataType.Confirmed ? 'confirmed' : 'combined';
-
         const sortedCountries = [...countriesData].sort((a, b) =>
-            a[sortBy] < b[sortBy] ? 1 : -1,
+            a.totalCases < b.totalCases ? 1 : -1,
         );
+
         dispatch(setCountriesData(sortedCountries));
         // eslint-disable-next-line
-    }, [dataType]);
-
-    // Update total cases count whenever current date in timeseries changes
-    useEffect(() => {
-        if (!currentDate || !timeseriesCaseCounts) return;
-
-        setTimeseriesTotalCases(
-            getTotalCasesByDate(timeseriesCaseCounts, currentDate),
-        );
-    }, [currentDate, timeseriesCaseCounts]);
+    }, [location.pathname]);
 
     const handleOnClick = () => {
         setOpenSidebar((value) => !value);
@@ -131,61 +126,69 @@ const SideBar = () => {
     };
 
     const Countries = () => {
+        if (regionalView) {
+            for (const country of countriesData) {
+                return (
+                    <>
+                        {country.districts.map((district) => {
+                            const { name, totalCases } = district;
+
+                            const countryCasesCountPercentage =
+                                (totalCases / totalCasesNumber) * 100;
+
+                            const isActive = selectedCountry
+                                ? selectedCountry.name === name
+                                : false;
+
+                            return (
+                                <LocationListItem
+                                    key={name}
+                                    onClick={() => handleOnCountryClick(name)}
+                                    data-cy="listed-country"
+                                    isActive={isActive}
+                                >
+                                    <>
+                                        <FlagIcon
+                                            loading="lazy"
+                                            src={`https://flagcdn.com/w20/${getTwoLetterCountryCode(
+                                                country.name,
+                                            ).toLowerCase()}.png`}
+                                            srcSet={`https://flagcdn.com/w40/${getTwoLetterCountryCode(
+                                                country.name,
+                                            ).toLowerCase()}.png 2x`}
+                                            alt={`${country.name} flag`}
+                                        />
+                                        <CountryLabel
+                                            isActive={isActive}
+                                            variant="body2"
+                                        >
+                                            {name}
+                                        </CountryLabel>
+                                    </>
+                                    <CountryCaseCount
+                                        isActive={isActive}
+                                        variant="body2"
+                                    >
+                                        {totalCases.toLocaleString()}
+                                    </CountryCaseCount>
+                                    <CaseCountsBar
+                                        barWidth={countryCasesCountPercentage}
+                                    />
+                                </LocationListItem>
+                            );
+                        })}
+                    </>
+                );
+            }
+        }
+
         return (
             <>
-                <LocationListItem
-                    onClick={() => handleOnCountryClick('worldwide')}
-                    data-cy="listed-country"
-                    isActive={
-                        selectedCountry
-                            ? selectedCountry.name === 'worldwide'
-                            : true
-                    }
-                >
-                    <>
-                        <EmptyFlag>-</EmptyFlag>
-                        <CountryLabel
-                            isActive={
-                                selectedCountry
-                                    ? selectedCountry.name === 'worldwide'
-                                    : true
-                            }
-                            variant="body2"
-                        >
-                            {getCountryName('worldwide')}
-                        </CountryLabel>
-                    </>
-                    <CountryCaseCount
-                        isActive={
-                            selectedCountry
-                                ? selectedCountry.name === 'worldwide'
-                                : true
-                        }
-                        variant="body2"
-                    >
-                        {dataType === DataType.Confirmed
-                            ? totalCasesNumber.confirmed.toLocaleString()
-                            : totalCasesNumber.total.toLocaleString()}
-                    </CountryCaseCount>
-                </LocationListItem>
-
-                {countriesData.map((row) => {
-                    if (
-                        totalCasesCountIsLoading ||
-                        timeseriesTotalCases === undefined
-                    )
-                        return;
-
-                    const { name, confirmed, combined } = row;
-
-                    const value =
-                        dataType === DataType.Confirmed ? confirmed : combined;
-                    const totalValue = DataType.Confirmed
-                        ? timeseriesTotalCases
-                        : totalCasesNumber.total;
+                {countriesData.map((country) => {
+                    const { name, totalCases } = country;
 
                     const countryCasesCountPercentage =
-                        (value / totalValue) * 100;
+                        (totalCases / totalCasesNumber) * 100;
 
                     const isActive = selectedCountry
                         ? selectedCountry.name === name
@@ -213,14 +216,14 @@ const SideBar = () => {
                                     isActive={isActive}
                                     variant="body2"
                                 >
-                                    {getCountryName(name)}
+                                    {name}
                                 </CountryLabel>
                             </>
                             <CountryCaseCount
                                 isActive={isActive}
                                 variant="body2"
                             >
-                                {value.toLocaleString()}
+                                {totalCases.toLocaleString()}
                             </CountryCaseCount>
                             <CaseCountsBar
                                 barWidth={countryCasesCountPercentage}
@@ -236,14 +239,14 @@ const SideBar = () => {
         <StyledSideBar sidebaropen={openSidebar} data-cy="sidebar">
             <>
                 <SideBarHeader id="sidebar-header">
-                    <h1 id="total">MONKEYPOX LINE LIST CASES</h1>
+                    <h1 id="total">
+                        {process.env.REACT_APP_DISEASE_NAME?.toUpperCase()} LINE
+                        LIST CASES
+                    </h1>
                 </SideBarHeader>
 
-                {location.pathname !== '/chart' && <DataTypeButtons />}
-
                 <LatestGlobal id="latest-global">
-                    {totalCasesCountIsLoading ||
-                    timeseriesTotalCases === undefined ? (
+                    {isLoading ? (
                         <SideBarTitlesSkeleton
                             animation="pulse"
                             variant="rectangular"
@@ -252,20 +255,16 @@ const SideBar = () => {
                     ) : (
                         <>
                             <span id="total-cases" className="active">
-                                {dataType === DataType.Confirmed
-                                    ? timeseriesTotalCases.toLocaleString()
-                                    : totalCasesNumber.total.toLocaleString()}
+                                {totalCasesNumber.toLocaleString()}
                             </span>
                             <span className="reported-cases-label">
-                                {dataType === DataType.Confirmed
-                                    ? 'confirmed cases'
-                                    : 'confirmed and suspected cases'}
+                                confirmed cases
                             </span>
                         </>
                     )}
+
                     <div className="last-updated-date">
-                        {totalCasesCountIsLoading ||
-                        timeseriesTotalCases === undefined ? (
+                        {isLoading ? (
                             <SideBarTitlesSkeleton
                                 animation="pulse"
                                 variant="rectangular"
@@ -273,7 +272,7 @@ const SideBar = () => {
                             />
                         ) : (
                             <span id="last-updated-date">
-                                Updated: {lastUpdateDate}
+                                Updated: {lastModifiedDate}
                             </span>
                         )}
                     </div>
@@ -285,14 +284,12 @@ const SideBar = () => {
                         options={autocompleteData}
                         autoHighlight
                         popupIcon={<></>}
-                        disabled={totalCasesCountIsLoading}
-                        getOptionLabel={(option) =>
-                            getCountryName(
-                                typeof option === 'string'
-                                    ? option
-                                    : option.name,
-                            )
-                        }
+                        disabled={isLoading}
+                        getOptionLabel={(option) => {
+                            return typeof option === 'string'
+                                ? option
+                                : option.name;
+                        }}
                         onChange={(
                             event,
                             value: SelectedCountry | string | null,
@@ -314,16 +311,20 @@ const SideBar = () => {
                                         loading="lazy"
                                         width="20"
                                         src={`https://flagcdn.com/w20/${getTwoLetterCountryCode(
-                                            option.name,
+                                            option.parentCountry
+                                                ? option.parentCountry
+                                                : option.name,
                                         ).toLowerCase()}.png`}
                                         srcSet={`https://flagcdn.com/w40/${getTwoLetterCountryCode(
-                                            option.name,
+                                            option.parentCountry
+                                                ? option.parentCountry
+                                                : option.name,
                                         ).toLowerCase()}.png 2x`}
-                                        alt={`${option.name} flag`}
+                                        alt={`${option} flag`}
                                     />
                                 )}
 
-                                {getCountryName(option.name)}
+                                {option.name}
                             </Box>
                         )}
                         renderInput={(params) => (
@@ -340,15 +341,54 @@ const SideBar = () => {
                 </SearchBar>
 
                 <LocationList>
-                    {totalCasesCountIsLoading ||
-                    timeseriesTotalCases === undefined ? (
+                    {isLoading ? (
                         <CountriesListSkeleton
                             animation="pulse"
                             variant="rectangular"
                             data-cy="loading-skeleton"
                         />
                     ) : (
-                        <Countries />
+                        <>
+                            <LocationListItem
+                                onClick={() =>
+                                    handleOnCountryClick('worldwide')
+                                }
+                                data-cy="listed-country"
+                                isActive={
+                                    selectedCountry
+                                        ? selectedCountry.name === 'worldwide'
+                                        : true
+                                }
+                            >
+                                <>
+                                    <EmptyFlag>-</EmptyFlag>
+                                    <CountryLabel
+                                        isActive={
+                                            selectedCountry
+                                                ? selectedCountry.name ===
+                                                  'worldwide'
+                                                : true
+                                        }
+                                        variant="body2"
+                                    >
+                                        Worldwide
+                                    </CountryLabel>
+                                </>
+                                <CountryCaseCount
+                                    isActive={
+                                        selectedCountry
+                                            ? selectedCountry.name ===
+                                              'worldwide'
+                                            : true
+                                    }
+                                    variant="body2"
+                                >
+                                    {totalCasesNumber.toLocaleString()}
+                                </CountryCaseCount>
+                            </LocationListItem>
+
+                            <Countries />
+                        </>
                     )}
                 </LocationList>
             </>

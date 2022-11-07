@@ -1,11 +1,11 @@
 import { configureStore, combineReducers } from '@reduxjs/toolkit';
 
 import appReducer from './App/slice';
-import chartViewReducer from './ChartView/slice';
+import countryViewReducer from './CountryView/slice';
 
 export const rootReducer = combineReducers({
     app: appReducer,
-    chartView: chartViewReducer,
+    countryView: countryViewReducer,
 });
 
 export const store = configureStore({
