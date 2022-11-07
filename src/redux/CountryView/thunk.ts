@@ -52,9 +52,14 @@ export const fetchCountriesData = createAsyncThunk<
             };
         });
 
+        // get only confirmed cases
+        const confirmedData = ebolaData.filter(
+            (data) => data.caseStatus === 'Confirmed',
+        );
+
         const countriesData: CountriesData[] = [];
         const countries: string[] = [];
-        ebolaData.map((data) =>
+        confirmedData.map((data) =>
             countries.push(data.country ? data.country : ''),
         );
         // remove all the duplicates
@@ -66,7 +71,7 @@ export const fetchCountriesData = createAsyncThunk<
 
         // get all the districts for a country
         for (const country of filteredCountries) {
-            const districts = ebolaData
+            const districts = confirmedData
                 .filter((data) => data.country === country)
                 .map((caseItem) => caseItem.location ?? '');
             const uniqueDistricts = [...new Set(districts)];
@@ -77,7 +82,7 @@ export const fetchCountriesData = createAsyncThunk<
             // count the cases for each district
             const districtsArr: { name: string; totalCases: number }[] = [];
             filteredDistricts.forEach((district) => {
-                const array = ebolaData.filter(
+                const array = confirmedData.filter(
                     (data) => data.location === district,
                 );
 
