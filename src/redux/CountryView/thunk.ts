@@ -5,6 +5,7 @@ import {
     CountriesData,
 } from 'models/CountryData';
 import Papa from 'papaparse';
+import { compareDesc } from 'date-fns';
 import enUSLocale from 'date-fns/locale/en-US';
 import { formatInTimeZone } from 'date-fns-tz';
 
@@ -26,7 +27,6 @@ export const fetchCountriesData = createAsyncThunk<
 
         // convert csv to json
         const latestFile = await fetch(dataUrl);
-        const lastModifiedDate = latestFile.headers.get('Last-Modified');
         if (latestFile.status !== 200) throw new Error();
         const reader = latestFile.body?.getReader();
         const result = await reader?.read();
@@ -48,6 +48,9 @@ export const fetchCountriesData = createAsyncThunk<
                 country: data.Country,
                 confirmationDate: data.Date_confirmation
                     ? new Date(data.Date_confirmation)
+                    : undefined,
+                lastModifiedDate: data.Date_last_modified
+                    ? new Date(data.Date_last_modified)
                     : undefined,
             };
         });
@@ -108,23 +111,32 @@ export const fetchCountriesData = createAsyncThunk<
             });
         }
 
-        // parse last modified date
-        let parsedModifiedDate: string | null = null;
-        if (lastModifiedDate) {
-            parsedModifiedDate = formatInTimeZone(
-                new Date(lastModifiedDate),
-                'Europe/Berlin',
-                'E LLL d yyyy',
-                {
-                    locale: enUSLocale,
-                },
-            );
-        }
+        // get last modified date
+
+        // parse dates and remove duplicates
+        const lastModifiedDates = confirmedData
+            .map(
+                (data) =>
+                    data.lastModifiedDate && data.lastModifiedDate.getTime(),
+            )
+            .filter((date, i, arr) => arr.indexOf(date) === i)
+            .map((date) => date && new Date(date));
+
+        // sort the dates
+        const sortedDates = lastModifiedDates.sort((dateA, dateB) =>
+            dateA && dateB && compareDesc(dateA, dateB) === 1 ? 1 : -1,
+        );
+
+        const lastModifiedDate =
+            sortedDates[0] &&
+            formatInTimeZone(sortedDates[0], 'Europe/Berlin', 'E LLL d yyyy', {
+                locale: enUSLocale,
+            });
 
         return {
             countriesData,
             countries,
-            lastModifiedDate: parsedModifiedDate,
+            lastModifiedDate: lastModifiedDate ? lastModifiedDate : null,
         };
     } catch (error: any) {
         if (error.response)
