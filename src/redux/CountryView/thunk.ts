@@ -95,18 +95,12 @@ export const fetchCountriesData = createAsyncThunk<
                 });
             });
 
-            const totalCases = districtsArr.reduce(
-                (previousValue, currentValue) =>
-                    previousValue + currentValue.totalCases,
-                0,
-            );
-
             // sort the districts based on case counts
             districtsArr.sort((a, b) => (a.totalCases < b.totalCases ? 1 : -1));
 
             countriesData.push({
                 name: country,
-                totalCases,
+                totalCases: districts.length, // here we take the length of unfiltered districts array in order to include cases without provided district into total country's case count
                 districts: districtsArr,
             });
         }
