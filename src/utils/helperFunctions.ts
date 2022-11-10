@@ -1,5 +1,7 @@
 import iso from 'iso-3166-1';
-import { CountriesData } from 'models/CountryData';
+import { CountriesData, EbolaCaseData } from 'models/CountryData';
+import { ChartData } from 'models/ChartData';
+import { compareAsc } from 'date-fns';
 
 // Parses search query that takes user to Curator Portal
 export const parseSearchQuery = (searchQuery: string): string => {
@@ -46,4 +48,50 @@ export const getTotalCasesNumber = (countriesData: CountriesData[]): number => {
     );
 
     return totalCases;
+};
+
+// CHART
+export const getChartData = (
+    countries: string[],
+    ebolaData: EbolaCaseData[],
+): ChartData => {
+    const chartData: ChartData = [];
+
+    for (const country of countries) {
+        const countryData = ebolaData.filter(
+            (data) => data.country && data.country === country,
+        );
+
+        const dates = countryData.map((data) => data.date);
+        // remove duplicate dates
+        const uniqueDates = dates
+            .map((date) => date && date.getTime())
+            .filter((date, i, arr) => arr.indexOf(date) === i)
+            .map((date) => date && new Date(date));
+
+        // sort dates
+        const sortedDates = uniqueDates.sort((dateA, dateB) =>
+            dateA && dateB && compareAsc(dateA, dateB) === 1 ? 1 : -1,
+        );
+
+        // count cases for each date
+        const countryChartData: { date: Date; caseCount: number }[] = [];
+        for (const date of sortedDates) {
+            if (date) {
+                let caseCount = 0;
+
+                countryData.forEach((data) => {
+                    if (data.date && data.date.getTime() === date.getTime()) {
+                        caseCount += 1;
+                    }
+                });
+
+                countryChartData.push({ date, caseCount });
+            }
+        }
+
+        chartData[country] = countryChartData;
+    }
+
+    return chartData;
 };

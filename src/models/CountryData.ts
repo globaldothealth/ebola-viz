@@ -51,7 +51,7 @@ export interface EbolaCaseData {
     location?: string;
     city?: string;
     country?: string;
-    confirmationDate?: Date;
+    date?: Date;
 }
 
 // this is the model used throughout the app
@@ -69,5 +69,5 @@ export interface EbolaIncomingData {
     Location?: string;
     City?: string;
     Country?: string;
-    Date_confirmation?: string;
+    Date_entry?: string;
 }
