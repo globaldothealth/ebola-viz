@@ -51,7 +51,7 @@ export interface EbolaCaseData {
     location?: string;
     city?: string;
     country?: string;
-    confirmationDate?: Date;
+    date?: Date;
     lastModifiedDate?: Date;
 }
 
@@ -70,6 +70,6 @@ export interface EbolaIncomingData {
     Location?: string;
     City?: string;
     Country?: string;
-    Date_confirmation?: string;
+    Date_entry?: string;
     Date_last_modified?: string;
 }
