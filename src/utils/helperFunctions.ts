@@ -57,6 +57,38 @@ export const getChartData = (
 ): ChartData => {
     const chartData: ChartData = [];
 
+    // worldwide chart data
+    const dates = ebolaData.map((data) => data.date);
+    // remove duplicate dates
+    const uniqueDates = dates
+        .map((date) => date && date.getTime())
+        .filter((date, i, arr) => arr.indexOf(date) === i)
+        .map((date) => date && new Date(date));
+
+    // sort dates
+    const sortedDates = uniqueDates.sort((dateA, dateB) =>
+        dateA && dateB && compareAsc(dateA, dateB) === 1 ? 1 : -1,
+    );
+
+    // count cases for each date
+    const worldwideChartData: { date: Date; caseCount: number }[] = [];
+    for (const date of sortedDates) {
+        if (date) {
+            let caseCount = 0;
+
+            ebolaData.forEach((data) => {
+                if (data.date && data.date.getTime() === date.getTime()) {
+                    caseCount += 1;
+                }
+            });
+
+            worldwideChartData.push({ date, caseCount });
+        }
+    }
+
+    chartData['worldwide'] = worldwideChartData;
+
+    // chart data for particular countries
     for (const country of countries) {
         const countryData = ebolaData.filter(
             (data) => data.country && data.country === country,
