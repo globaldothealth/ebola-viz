@@ -15,7 +15,8 @@ import mapboxgl from 'mapbox-gl';
 // This has to be done in order to avoid transpilation errors after build
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-mapboxgl.workerClass = require('worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker').default;
+mapboxgl.workerClass =
+    require('worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker').default;
 
 ReactDOM.render(
     <StrictMode>
