@@ -1,8 +1,8 @@
-# Global.health Monkeypox visualization
+# Global.health Ebola visualization
 
-Global.health Monkeypox visualization
+Global.health Ebola visualization
 
-https://map.monkeypox.global.health
+https://map.ebola.global.health
 
 **Main technologies and libraries used in this project**
 
@@ -14,11 +14,10 @@ https://map.monkeypox.global.health
 -   Mapbox
 -   Mui
 -   Cypress
--   Craco
 
 ## Development
 
-http://dev-map.monkeypox.global.health.s3-website.eu-central-1.amazonaws.com/country
+https://dev-map.ebola.global.health
 
 Once you clone the project, you can use npm to install all the dependencies by running:
 
