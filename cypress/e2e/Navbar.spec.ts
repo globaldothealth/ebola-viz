@@ -10,6 +10,8 @@ describe('<Navbar />', () => {
         cy.get('#logo').should('be.visible');
         cy.contains('Country View').should('be.visible');
         cy.contains('Regional View').should('be.visible');
+        cy.contains('Chart View').should('be.visible');
+        cy.contains('Feedback').should('be.visible');
 
         cy.url().should('include', '/country');
     });

@@ -14,6 +14,7 @@ import {
 } from 'recharts';
 import { useTheme } from '@mui/material/styles';
 import Loader from 'components/Loader';
+import Typography from '@mui/material/Typography';
 
 import { ChartContainer } from './styled';
 
@@ -40,6 +41,17 @@ const ChartView = () => {
                 <Loader />
             ) : (
                 <ChartContainer>
+                    <Typography
+                        variant="body1"
+                        sx={{ width: '100%', textAlign: 'center' }}
+                    >
+                        Total confirmed cases:{' '}
+                        <strong>
+                            {selectedCountry.charAt(0).toUpperCase() +
+                                selectedCountry.slice(1)}
+                        </strong>
+                    </Typography>
+
                     <ResponsiveContainer width="90%" height="80%">
                         <BarChart data={chartData[selectedCountry]}>
                             <CartesianGrid

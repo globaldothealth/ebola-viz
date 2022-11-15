@@ -37,14 +37,6 @@ describe('<App />', () => {
         cy.contains('Fetching countries data failed').should('be.visible');
     });
 
-    it('Displays Navbar items', () => {
-        cy.visit('/');
-
-        cy.contains(/Country View/i).should('be.visible');
-        cy.contains(/Regional View/i).should('be.visible');
-        cy.contains(/Feedback/i).should('be.visible');
-    });
-
     it('Navigates to different views', () => {
         cy.intercept(
             'GET',
@@ -58,6 +50,12 @@ describe('<App />', () => {
         cy.contains(/Country view/i).click();
         cy.contains(/Line List Cases/i).should('be.visible');
         cy.url().should('eq', 'http://localhost:3000/country');
+
+        cy.contains(/Regional View/i).click();
+        cy.url().should('eq', 'http://localhost:3000/regional');
+
+        cy.contains(/Chart View/i).click();
+        cy.url().should('eq', 'http://localhost:3000/chart');
 
         cy.contains(/Feedback/i)
             .should('have.attr', 'href')
