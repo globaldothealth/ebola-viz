@@ -70,6 +70,6 @@ export interface EbolaIncomingData {
     Location?: string;
     City?: string;
     Country?: string;
-    Date_entry?: string;
+    Date_confirmation?: string;
     Date_last_modified?: string;
 }

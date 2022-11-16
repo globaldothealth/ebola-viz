@@ -50,8 +50,8 @@ export const fetchCountriesData = createAsyncThunk<
                         : undefined,
                     city: data.City,
                     country: data.Country,
-                    date: data.Date_entry
-                        ? new Date(data.Date_entry)
+                    date: data.Date_confirmation
+                        ? new Date(data.Date_confirmation)
                         : undefined,
                     lastModifiedDate: data.Date_last_modified
                         ? new Date(data.Date_last_modified)
