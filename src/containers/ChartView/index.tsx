@@ -11,6 +11,7 @@ import {
     BarChart,
     Bar,
     CartesianGrid,
+    Label,
 } from 'recharts';
 import { useTheme } from '@mui/material/styles';
 import Loader from 'components/Loader';
@@ -64,8 +65,26 @@ const ChartView = () => {
                                 tickFormatter={(value: Date) =>
                                     format(value, 'LLL d yyyy')
                                 }
-                            />
-                            <YAxis allowDecimals={false} />
+                                height={50}
+                            >
+                                <Label
+                                    position="bottom"
+                                    style={{ textAnchor: 'middle' }}
+                                    offset={-10}
+                                >
+                                    Date
+                                </Label>
+                            </XAxis>
+                            <YAxis allowDecimals={false}>
+                                <Label
+                                    angle={-90}
+                                    position="left"
+                                    offset={-10}
+                                    style={{ textAnchor: 'middle' }}
+                                >
+                                    Confirmed cases
+                                </Label>
+                            </YAxis>
                             <Bar
                                 dataKey="caseCount"
                                 fill={theme.palette.primary.main}
