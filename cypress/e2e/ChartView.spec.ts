@@ -24,6 +24,8 @@ describe('<ChartView />', () => {
 
         cy.contains(/Total confirmed cases: Worldwide/i);
 
+        cy.wait(1500);
+
         cy.contains(/Uganda/i).click();
 
         cy.contains(/Total confirmed cases: Worldwide/i).should('not.exist');
