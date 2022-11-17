@@ -127,3 +127,15 @@ export const getChartData = (
 
     return chartData;
 };
+
+export const getCumulativeChartData = (
+    chartData: { date: Date; caseCount: number }[],
+) => {
+    let prevSum = 0;
+    return chartData.map((data) => {
+        return {
+            date: data.date,
+            caseCount: (prevSum += data.caseCount),
+        };
+    });
+};
