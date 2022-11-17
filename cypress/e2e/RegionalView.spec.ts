@@ -1,4 +1,4 @@
-describe('<CountryView />', () => {
+describe('<RegionalView />', () => {
     it('Displays map and legend', () => {
         cy.intercept(
             'GET',
