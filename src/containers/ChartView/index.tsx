@@ -1,31 +1,26 @@
-import { useState, useEffect } from 'react';
-import { useAppSelector } from 'redux/hooks';
-import { selectChartData } from 'redux/ChartView/selectors';
+import { useState, useEffect, useMemo } from 'react';
+import { useAppSelector, useAppDispatch } from 'redux/hooks';
+import { selectChartData, selectChartType } from 'redux/ChartView/selectors';
+import { setChartType, ChartType } from 'redux/ChartView/slice';
 import { selectSelectedCountryInSideBar } from 'redux/App/selectors';
-import { format } from 'date-fns';
-import {
-    XAxis,
-    YAxis,
-    ResponsiveContainer,
-    Tooltip,
-    BarChart,
-    Bar,
-    CartesianGrid,
-    Label,
-} from 'recharts';
-import { useTheme } from '@mui/material/styles';
 import Loader from 'components/Loader';
 import Typography from '@mui/material/Typography';
 
 import { ChartContainer } from './styled';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import ToggleButton from '@mui/material/ToggleButton';
+import BarChart from './BarChart';
+import CumulativeChart from './CumulativeChart';
+import { getCumulativeChartData } from 'utils/helperFunctions';
 
 const ChartView = () => {
-    const theme = useTheme();
+    const dispatch = useAppDispatch();
 
     const chartData = useAppSelector(selectChartData);
     const selectedCountryInSidebar = useAppSelector(
         selectSelectedCountryInSideBar,
     );
+    const chartType = useAppSelector(selectChartType);
     const [isLoading, setIsLoading] = useState(true);
 
     const selectedCountry = selectedCountryInSidebar
@@ -35,6 +30,17 @@ const ChartView = () => {
     useEffect(() => {
         setIsLoading(!chartData || !chartData[selectedCountry]);
     }, [chartData, selectedCountry]);
+
+    const cumulativeChartData = useMemo(() => {
+        if (
+            chartType !== ChartType.Cumulative ||
+            !chartData ||
+            !chartData[selectedCountry]
+        )
+            return [];
+
+        return getCumulativeChartData(chartData[selectedCountry]);
+    }, [chartType, chartData, selectedCountry]);
 
     return (
         <>
@@ -53,55 +59,28 @@ const ChartView = () => {
                         </strong>
                     </Typography>
 
-                    <ResponsiveContainer width="90%" height="80%">
-                        <BarChart data={chartData[selectedCountry]}>
-                            <CartesianGrid
-                                stroke="rgba(0, 0, 0, 0.1)"
-                                strokeDasharray="5 5"
-                            />
-                            <XAxis
-                                dataKey="date"
-                                interval="preserveStartEnd"
-                                tickFormatter={(value: Date) =>
-                                    format(value, 'LLL d yyyy')
-                                }
-                                height={50}
-                            >
-                                <Label
-                                    position="bottom"
-                                    style={{ textAnchor: 'middle' }}
-                                    offset={-10}
-                                >
-                                    Date
-                                </Label>
-                            </XAxis>
-                            <YAxis allowDecimals={false}>
-                                <Label
-                                    angle={-90}
-                                    position="left"
-                                    offset={-10}
-                                    style={{ textAnchor: 'middle' }}
-                                >
-                                    Confirmed cases
-                                </Label>
-                            </YAxis>
-                            <Bar
-                                dataKey="caseCount"
-                                fill={theme.palette.primary.main}
-                            />
+                    <ToggleButtonGroup
+                        color="primary"
+                        value={chartType}
+                        exclusive
+                        onChange={(_, value) =>
+                            dispatch(setChartType(value as ChartType))
+                        }
+                        aria-label="chart data type change buttons"
+                    >
+                        <ToggleButton value={ChartType.Bar}>
+                            Bar chart
+                        </ToggleButton>
+                        <ToggleButton value={ChartType.Cumulative}>
+                            Cumulative chart
+                        </ToggleButton>
+                    </ToggleButtonGroup>
 
-                            <Tooltip
-                                formatter={(value: string) => [
-                                    value,
-                                    'Case count',
-                                ]}
-                                labelFormatter={(value: Date) =>
-                                    format(value, 'E LLL d yyyy')
-                                }
-                                cursor={{ fillOpacity: 0.2 }}
-                            />
-                        </BarChart>
-                    </ResponsiveContainer>
+                    {chartType === ChartType.Bar ? (
+                        <BarChart data={chartData[selectedCountry]} />
+                    ) : (
+                        <CumulativeChart data={cumulativeChartData} />
+                    )}
                 </ChartContainer>
             )}
         </>

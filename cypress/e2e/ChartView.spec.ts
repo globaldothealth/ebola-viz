@@ -1,4 +1,4 @@
-describe('<SideBar />', () => {
+describe('<ChartView />', () => {
     beforeEach(() => {
         cy.intercept(
             'GET',
@@ -17,11 +17,14 @@ describe('<SideBar />', () => {
 
     it('Can select specific countries from the Sidebar', () => {
         cy.visit('/');
+
+        cy.wait('@fetchCountriesData');
+
         cy.contains('Chart View').click();
 
         cy.contains(/Total confirmed cases: Worldwide/i);
 
-        cy.wait('@fetchCountriesData');
+        cy.wait(1500);
 
         cy.contains(/Uganda/i).click();
 
