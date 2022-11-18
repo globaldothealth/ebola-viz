@@ -9,7 +9,8 @@ import {
     Tooltip,
 } from 'recharts';
 import { useTheme } from '@mui/material/styles';
-import { format } from 'date-fns';
+import enUSLocale from 'date-fns/locale/en-US';
+import { formatInTimeZone } from 'date-fns-tz';
 
 interface BarChartProps {
     data: {
@@ -31,7 +32,11 @@ const BarChart = ({ data }: BarChartProps) => {
                 <XAxis
                     dataKey="date"
                     interval="preserveStartEnd"
-                    tickFormatter={(value: Date) => format(value, 'LLL d yyyy')}
+                    tickFormatter={(value: Date) =>
+                        formatInTimeZone(value, 'Europe/Berlin', 'LLL d yyyy', {
+                            locale: enUSLocale,
+                        })
+                    }
                     height={50}
                 >
                     <Label
@@ -57,7 +62,14 @@ const BarChart = ({ data }: BarChartProps) => {
                 <Tooltip
                     formatter={(value: string) => [value, 'Case count']}
                     labelFormatter={(value: Date) =>
-                        format(value, 'E LLL d yyyy')
+                        formatInTimeZone(
+                            value,
+                            'Europe/Berlin',
+                            'E LLL d yyyy',
+                            {
+                                locale: enUSLocale,
+                            },
+                        )
                     }
                     cursor={{ fillOpacity: 0.2 }}
                 />

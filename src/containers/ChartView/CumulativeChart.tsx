@@ -9,7 +9,8 @@ import {
     AreaChart,
 } from 'recharts';
 import { useTheme } from '@mui/material/styles';
-import { format } from 'date-fns';
+import enUSLocale from 'date-fns/locale/en-US';
+import { formatInTimeZone } from 'date-fns-tz';
 
 interface CumulativeChartProps {
     data: {
@@ -46,7 +47,11 @@ const CumulativeChart = ({ data }: CumulativeChartProps) => {
                     dataKey="date"
                     interval="preserveStartEnd"
                     minTickGap={150}
-                    tickFormatter={(value: Date) => format(value, 'LLL d yyyy')}
+                    tickFormatter={(value: Date) =>
+                        formatInTimeZone(value, 'Europe/Berlin', 'LLL d yyyy', {
+                            locale: enUSLocale,
+                        })
+                    }
                     height={50}
                 >
                     <Label
@@ -78,7 +83,14 @@ const CumulativeChart = ({ data }: CumulativeChartProps) => {
                 <Tooltip
                     formatter={(value: string) => [value, 'Case count']}
                     labelFormatter={(value: Date) =>
-                        format(value, 'E LLL d yyyy')
+                        formatInTimeZone(
+                            value,
+                            'Europe/Berlin',
+                            'E LLL d yyyy',
+                            {
+                                locale: enUSLocale,
+                            },
+                        )
                     }
                     cursor={{ fillOpacity: 0.2 }}
                 />
