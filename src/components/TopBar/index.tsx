@@ -36,6 +36,7 @@ const TopBar = () => {
                                 Country View
                             </Typography>
                         </NavLink>
+
                         <NavLink
                             to="/regional"
                             className={({ isActive }) =>
@@ -45,6 +46,18 @@ const TopBar = () => {
                         >
                             <Typography variant="navbarlink" gutterBottom>
                                 Regional View
+                            </Typography>
+                        </NavLink>
+
+                        <NavLink
+                            to="/chart"
+                            className={({ isActive }) =>
+                                'nav-link' + (isActive ? ' activated' : '')
+                            }
+                            onClick={resetSelectedCountry}
+                        >
+                            <Typography variant="navbarlink" gutterBottom>
+                                Chart View
                             </Typography>
                         </NavLink>
 

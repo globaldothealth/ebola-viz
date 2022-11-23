@@ -3,6 +3,7 @@ import TopBar from 'components/TopBar';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import CountryView from 'containers/CountryView';
 import RegionalView from 'containers/RegionalView';
+import ChartView from 'containers/ChartView';
 import SideBar from 'components/SideBar';
 import { useAppDispatch, useAppSelector } from 'redux/hooks';
 import { fetchCountriesData } from 'redux/CountryView/thunk';
@@ -73,6 +74,7 @@ const App = () => {
                     />
                     <Route path="/country" element={<CountryView />} />
                     <Route path="/regional" element={<RegionalView />} />
+                    <Route path="/chart" element={<ChartView />} />
                 </Routes>
 
                 {error && (
