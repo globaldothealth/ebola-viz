@@ -43,12 +43,10 @@ export const fetchCountriesData = createAsyncThunk<
             const ebolaData: EbolaCaseData[] = dataRows.map((data) => {
                 return {
                     id: data.ID,
-                    pathogenStatus: data.Pathogen_status,
                     caseStatus: data.Case_status,
-                    location: data.Location
-                        ? data.Location.replace('District', '').trim()
+                    location: data.Location_District
+                        ? data.Location_District.replace('District', '').trim()
                         : undefined,
-                    city: data.City,
                     country: data.Country,
                     date: data.Date_confirmation
                         ? new Date(data.Date_confirmation)
@@ -145,7 +143,7 @@ export const fetchCountriesData = createAsyncThunk<
 
             return {
                 countriesData,
-                countries,
+                countries: filteredCountries,
                 lastModifiedDate: lastModifiedDate ? lastModifiedDate : null,
             };
         } catch (error: any) {

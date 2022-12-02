@@ -46,10 +46,8 @@ export enum CaseStatus {
 
 export interface EbolaCaseData {
     id: number;
-    pathogenStatus?: string;
     caseStatus?: CaseStatus;
     location?: string;
-    city?: string;
     country?: string;
     date?: Date;
     lastModifiedDate?: Date;
@@ -65,10 +63,8 @@ export interface CountriesData {
 // data format in the orignal CSV file
 export interface EbolaIncomingData {
     ID: number;
-    Pathogen_status?: string;
     Case_status?: CaseStatus;
-    Location?: string;
-    City?: string;
+    Location_District?: string;
     Country?: string;
     Date_confirmation?: string;
     Date_last_modified?: string;
