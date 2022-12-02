@@ -86,8 +86,8 @@ export const getChartData = (
                 if (
                     data.date &&
                     compareAsc(
-                        data.date.setHours(0, 0, 0, 0),
-                        date.setHours(0, 0, 0, 0),
+                        data.date.setHours(23, 0, 0, 0),
+                        date.setHours(23, 0, 0, 0),
                     ) === 0
                 ) {
                     caseCount += 1;
@@ -134,8 +134,8 @@ export const getChartData = (
                     if (
                         data.date &&
                         compareAsc(
-                            data.date.setHours(0, 0, 0, 0),
-                            date.setHours(0, 0, 0, 0),
+                            data.date.setHours(23, 0, 0, 0),
+                            date.setHours(23, 0, 0, 0),
                         ) === 0
                     ) {
                         caseCount += 1;
