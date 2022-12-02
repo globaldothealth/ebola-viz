@@ -1,7 +1,7 @@
 import iso from 'iso-3166-1';
 import { CountriesData, EbolaCaseData } from 'models/CountryData';
 import { ChartData } from 'models/ChartData';
-import { compareAsc } from 'date-fns';
+import { compareAsc, eachDayOfInterval } from 'date-fns';
 
 // Parses search query that takes user to Curator Portal
 export const parseSearchQuery = (searchQuery: string): string => {
@@ -70,14 +70,26 @@ export const getChartData = (
         dateA && dateB && compareAsc(dateA, dateB) === 1 ? 1 : -1,
     );
 
+    // fill the dates array with days that have 0 cases
+    const allDates = eachDayOfInterval({
+        start: sortedDates[0] || 0,
+        end: sortedDates[sortedDates.length - 1] || 0,
+    });
+
     // count cases for each date
     const worldwideChartData: { date: Date; caseCount: number }[] = [];
-    for (const date of sortedDates) {
+    for (const date of allDates) {
         if (date) {
             let caseCount = 0;
 
             ebolaData.forEach((data) => {
-                if (data.date && data.date.getTime() === date.getTime()) {
+                if (
+                    data.date &&
+                    compareAsc(
+                        data.date.setHours(0, 0, 0, 0),
+                        date.setHours(0, 0, 0, 0),
+                    ) === 0
+                ) {
                     caseCount += 1;
                 }
             });
@@ -106,14 +118,26 @@ export const getChartData = (
             dateA && dateB && compareAsc(dateA, dateB) === 1 ? 1 : -1,
         );
 
+        // fill the dates array with days that have 0 cases
+        const allDates = eachDayOfInterval({
+            start: sortedDates[0] || 0,
+            end: sortedDates[sortedDates.length - 1] || 0,
+        });
+
         // count cases for each date
         const countryChartData: { date: Date; caseCount: number }[] = [];
-        for (const date of sortedDates) {
+        for (const date of allDates) {
             if (date) {
                 let caseCount = 0;
 
                 countryData.forEach((data) => {
-                    if (data.date && data.date.getTime() === date.getTime()) {
+                    if (
+                        data.date &&
+                        compareAsc(
+                            data.date.setHours(0, 0, 0, 0),
+                            date.setHours(0, 0, 0, 0),
+                        ) === 0
+                    ) {
                         caseCount += 1;
                     }
                 });
