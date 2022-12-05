@@ -33,9 +33,14 @@ const BarChart = ({ data }: BarChartProps) => {
                     dataKey="date"
                     interval="preserveStartEnd"
                     tickFormatter={(value: Date) =>
-                        formatInTimeZone(value, 'Europe/Berlin', 'LLL d yyyy', {
-                            locale: enUSLocale,
-                        })
+                        formatInTimeZone(
+                            value,
+                            'America/New_York',
+                            'LLL d yyyy',
+                            {
+                                locale: enUSLocale,
+                            },
+                        )
                     }
                     height={50}
                 >

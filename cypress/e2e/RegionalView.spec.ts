@@ -12,7 +12,7 @@ describe('<RegionalView />', () => {
 
         cy.contains('Regional View').click();
 
-        cy.wait(1500);
+        cy.wait(2000);
 
         cy.get('.mapboxgl-canvas').should('be.visible');
         cy.contains('Confirmed cases').should('be.visible');
