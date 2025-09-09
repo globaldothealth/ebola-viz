@@ -33,10 +33,13 @@ export const fetchCountriesData = createAsyncThunk<
             const latestFile = await fetch(dataUrl);
             if (latestFile.status !== 200) throw new Error();
             const reader = latestFile.body?.getReader();
-            const result = await reader?.read();
-            const decoder = new TextDecoder('utf-8');
-            const csv = decoder.decode(result?.value);
-            const results = Papa.parse(csv, { header: true });
+            let result = ''
+            while (true && reader) {
+                const { value, done } = await reader.read()
+                if (value) result += new TextDecoder().decode(value)
+                if (done) break;
+            }
+            const results = Papa.parse(result, { header: true });
             const dataRows = results.data as EbolaIncomingData[];
 
             // parse the data to correct type
@@ -141,6 +144,11 @@ export const fetchCountriesData = createAsyncThunk<
                     },
                 );
 
+            console.log({
+                countriesData,
+                countries: filteredCountries,
+                lastModifiedDate: lastModifiedDate ? lastModifiedDate : null,
+            })
             return {
                 countriesData,
                 countries: filteredCountries,
