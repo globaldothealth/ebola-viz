@@ -144,11 +144,6 @@ export const fetchCountriesData = createAsyncThunk<
                     },
                 );
 
-            console.log({
-                countriesData,
-                countries: filteredCountries,
-                lastModifiedDate: lastModifiedDate ? lastModifiedDate : null,
-            })
             return {
                 countriesData,
                 countries: filteredCountries,
